@@ -17,11 +17,21 @@ def extract_memories(messages, api_key):
     # PROMPT FOR MEMORY EXTRACTION - CUSTOMIZE THIS
     prompt = """Analyze these messages and extract user preferences, emotional patterns, and facts.
 
-Messages:
-{messages}
+# PROMPT FOR MEMORY EXTRACTION - CUSTOMIZE THIS
+    prompt = f"""You are a memory extraction system for a companion AI. Analyze these messages and extract what's important to remember about this user.
 
-Return only JSON:
-{{"preferences": [], "emotional_patterns": [], "facts": []}}"""
+Messages:
+{chr(10).join(f"{i+1}. {msg}" for i, msg in enumerate(messages))}
+
+Extract three categories:
+1. PREFERENCES: Their likes, dislikes, habits, choices (what they enjoy/avoid)
+2. EMOTIONAL_PATTERNS: Recurring feelings, triggers, mental health patterns, how they respond to stress
+3. FACTS: Concrete life information - job, location, relationships, goals, background
+
+Be specific and detailed. Extract 8-12 items per category. Use their own language when possible.
+
+Return ONLY valid JSON:
+{{"preferences": ["item1", "item2", ...], "emotional_patterns": ["item1", "item2", ...], "facts": ["item1", "item2", ...]}}"""
     
     response = client.messages.create(
         model="claude-sonnet-4-20250514",
@@ -36,10 +46,22 @@ def transform_persona(text, persona, memory, api_key):
     client = anthropic.Anthropic(api_key=api_key)
     
     # PROMPT FOR PERSONALITY TRANSFORMATION - CUSTOMIZE THIS
-    prompt = f"""You are a {persona}. 
-User context: {json.dumps(memory)}
-Transform this: "{text}"
-Make it match your persona style."""
+    prompt = f"""You are a {persona} responding to a user you know well.
+
+USER CONTEXT:
+Preferences: {', '.join(memory.get('preferences', [])[:5])}
+Emotions: {', '.join(memory.get('emotional_patterns', [])[:5])}
+Facts: {', '.join(memory.get('facts', [])[:5])}
+
+ORIGINAL MESSAGE: "{text}"
+
+Rewrite this completely in your {persona} voice:
+- Reference specific user details naturally
+- Transform tone, structure, and delivery entirely
+- Be authentic to your persona style
+- Make it feel personalized
+
+Write ONLY your response:"""
     
     response = client.messages.create(
         model="claude-sonnet-4-20250514",
