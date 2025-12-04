@@ -99,7 +99,7 @@ Write ONLY your response:"""
 
 def main():
     # PASTE YOUR OPENAI API KEY HERE
-    api_key = os.environ.get("OPENAI_API_KEY", "PASTE_YOUR_OPENAI_API_KEY_HERE")
+    api_key = os.environ.get("OPENAI_API_KEY", "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")
     
     if "PASTE_YOUR" in api_key:
         print("\n ERROR: Please add your OpenAI API key on line 103!")
