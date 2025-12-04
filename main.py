@@ -7,7 +7,34 @@ MESSAGES = [
     "I love coffee in the morning",
     "I'm anxious about my interview",
     "I play guitar every evening",
-    # ADD MORE MESSAGES HERE 
+    # ADD MORE MESSAGES HERE (need 30 total)
+    "I tend to procrastinate when stressed",
+    "I'm a software engineer working on AI",
+    "I prefer texts over calls",
+    "I get excited learning new programming languages",
+    "I've been feeling lonely in my new city",
+    "I love spicy Thai food",
+    "I'm not a morning person",
+    "I struggle with imposter syndrome",
+    "I enjoy hiking on weekends",
+    "I get frustrated with slow replies",
+    "Trying to go to gym regularly",
+    "I love sci-fi movies",
+    "I overthink social interactions",
+    "I'm vegetarian for 3 years",
+    "I get motivated by passion projects",
+    "Having trouble sleeping due to stress",
+    "I love reading tech blogs",
+    "I'm anxious in large gatherings",
+    "Learning Spanish on Duolingo daily",
+    "I feel guilty taking breaks",
+    "I love RPG video games",
+    "I'm hard on myself for mistakes",
+    "Planning to adopt a dog soon",
+    "I get energized solving technical problems",
+    "I journal to manage anxiety",
+    "I listen to lo-fi while coding",
+    "Trying to make friends in new city"
 ]
 
 def extract_memories(messages, api_key):
@@ -15,9 +42,6 @@ def extract_memories(messages, api_key):
     client = anthropic.Anthropic(api_key=api_key)
     
     # PROMPT FOR MEMORY EXTRACTION - CUSTOMIZE THIS
-    prompt = """Analyze these messages and extract user preferences, emotional patterns, and facts.
-
-# PROMPT FOR MEMORY EXTRACTION - CUSTOMIZE THIS
     prompt = f"""You are a memory extraction system for a companion AI. Analyze these messages and extract what's important to remember about this user.
 
 Messages:
@@ -36,10 +60,11 @@ Return ONLY valid JSON:
     response = client.messages.create(
         model="claude-sonnet-4-20250514",
         max_tokens=2000,
-        messages=[{"role": "user", "content": prompt.format(messages="\n".join(messages))}]
+        messages=[{"role": "user", "content": prompt}]
     )
     
-    return json.loads(response.content[0].text.replace("```json", "").replace("```", ""))
+    text = response.content[0].text.replace("```json", "").replace("```", "").strip()
+    return json.loads(text)
 
 def transform_persona(text, persona, memory, api_key):
     """Transform text using persona style"""
@@ -72,7 +97,7 @@ Write ONLY your response:"""
     return response.content[0].text
 
 def main():
-    #  SET YOUR API KEY HERE OR USE ENVIRONMENT VARIABLE
+    # SET YOUR API KEY HERE OR USE ENVIRONMENT VARIABLE
     api_key = os.environ.get("ANTHROPIC_API_KEY", "PASTE_YOUR_API_KEY_HERE")
     
     print("\n=== MEMORY EXTRACTION ===\n")
@@ -94,4 +119,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
