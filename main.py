@@ -1,4 +1,4 @@
-import anthropic
+from openai import OpenAI
 import json
 import os
 
@@ -7,7 +7,6 @@ MESSAGES = [
     "I love coffee in the morning",
     "I'm anxious about my interview",
     "I play guitar every evening",
-    # ADD MORE MESSAGES HERE (need 30 total)
     "I tend to procrastinate when stressed",
     "I'm a software engineer working on AI",
     "I prefer texts over calls",
@@ -39,9 +38,9 @@ MESSAGES = [
 
 def extract_memories(messages, api_key):
     """Extract preferences, emotions, and facts from messages"""
-    client = anthropic.Anthropic(api_key=api_key)
+    client = OpenAI(api_key=api_key)
     
-    # PROMPT FOR MEMORY EXTRACTION - CUSTOMIZE THIS
+    # PROMPT FOR MEMORY EXTRACTION
     prompt = f"""You are a memory extraction system for a companion AI. Analyze these messages and extract what's important to remember about this user.
 
 Messages:
@@ -57,20 +56,21 @@ Be specific and detailed. Extract 8-12 items per category. Use their own languag
 Return ONLY valid JSON:
 {{"preferences": ["item1", "item2", ...], "emotional_patterns": ["item1", "item2", ...], "facts": ["item1", "item2", ...]}}"""
     
-    response = client.messages.create(
-        model="claude-sonnet-4-20250514",
-        max_tokens=2000,
-        messages=[{"role": "user", "content": prompt}]
+    response = client.chat.completions.create(
+        model="gpt-4o-mini",  # Cheapest model, or use "gpt-4o" for better quality
+        messages=[{"role": "user", "content": prompt}],
+        temperature=0.7,
+        max_tokens=2000
     )
     
-    text = response.content[0].text.replace("```json", "").replace("```", "").strip()
+    text = response.choices[0].message.content.replace("```json", "").replace("```", "").strip()
     return json.loads(text)
 
 def transform_persona(text, persona, memory, api_key):
     """Transform text using persona style"""
-    client = anthropic.Anthropic(api_key=api_key)
+    client = OpenAI(api_key=api_key)
     
-    # PROMPT FOR PERSONALITY TRANSFORMATION - CUSTOMIZE THIS
+    # PROMPT FOR PERSONALITY TRANSFORMATION
     prompt = f"""You are a {persona} responding to a user you know well.
 
 USER CONTEXT:
@@ -88,21 +88,31 @@ Rewrite this completely in your {persona} voice:
 
 Write ONLY your response:"""
     
-    response = client.messages.create(
-        model="claude-sonnet-4-20250514",
-        max_tokens=1000,
-        messages=[{"role": "user", "content": prompt}]
+    response = client.chat.completions.create(
+        model="gpt-4o-mini",  # Cheapest model, or use "gpt-4o" for better quality
+        messages=[{"role": "user", "content": prompt}],
+        temperature=0.8,
+        max_tokens=1000
     )
     
-    return response.content[0].text
+    return response.choices[0].message.content
 
 def main():
-    # SET YOUR API KEY HERE OR USE ENVIRONMENT VARIABLE
-    api_key = os.environ.get("ANTHROPIC_API_KEY", "PASTE_YOUR_API_KEY_HERE")
+    # PASTE YOUR OPENAI API KEY HERE
+    api_key = os.environ.get("OPENAI_API_KEY", "PASTE_YOUR_OPENAI_API_KEY_HERE")
+    
+    if "PASTE_YOUR" in api_key:
+        print("\n ERROR: Please add your OpenAI API key on line 103!")
+        print("Get it from: https://platform.openai.com/api-keys\n")
+        return
     
     print("\n=== MEMORY EXTRACTION ===\n")
-    memories = extract_memories(MESSAGES, api_key)
-    print(json.dumps(memories, indent=2))
+    try:
+        memories = extract_memories(MESSAGES, api_key)
+        print(json.dumps(memories, indent=2))
+    except Exception as e:
+        print(f"Error: {e}")
+        return
     
     print("\n=== PERSONALITY ENGINE ===\n")
     base_text = "How are you feeling about your interview?"
@@ -114,8 +124,13 @@ def main():
     
     for persona in personas:
         print(f"\n{persona.upper()}:")
-        result = transform_persona(base_text, persona, memories, api_key)
-        print(result)
+        try:
+            result = transform_persona(base_text, persona, memories, api_key)
+            print(result)
+        except Exception as e:
+            print(f"Error: {e}")
 
 if __name__ == "__main__":
     main()
+
+openai
