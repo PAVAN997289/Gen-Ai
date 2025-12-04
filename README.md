@@ -1,15 +1,20 @@
-# AI Companion
+
+
+Memory extraction + personality engine using OpenAI API
 
 ## Setup
 ```bash
-pip install -r requirements.txt
-export API_KEY='your-key'
+# Install
+pip install openai
+
+# Run
 python main.py
 ```
 
-## Customize
-1. Line 13: Add your 30 messages
-2. Line 20: Modify memory extraction prompt
-3. Line 37: Modify personality prompt
-4. Line 52: **REPLACE API KEY HERE**
-5. Line 62: Add/modify personas
+## Get API Key
+
+1. Go to: https://platform.openai.com/api-keys
+2. Click "Create new secret key"
+3. Copy the key (starts with `sk-...`)
+4. Paste in line 103 of main.py
+
